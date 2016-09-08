@@ -1,0 +1,116 @@
+<!DOCTYPE lang='en'>
+<html>
+<head>
+  <title>Giphy Galore</title>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width'>
+</head>
+<body>
+  <div id='searchButtons'>
+    <!--<button data-theme='video game'>Video Games</button>
+    <button data-theme='dance'>Dance</button>
+    <button data-theme='friday'>Friday</button>-->
+  </div>
+  <div>
+    <form id='theme-form'>
+        <label for='theme-input'></label>
+        <input type='text' id='theme-input'><br>
+        <input id='addTheme' type='submit' value='Add Something Awesome!'>
+    </form>
+  </div>
+
+  <div id='gifsHere'>
+  </div>
+  <script src='http://code.jquery.com/jquery-2.1.3.min.js'></script>
+  <script type='text/javascript'>
+
+  var themes = ['video games', 'dance', 'friday'];
+
+  function renderButtons(){
+    $('#searchButtons').empty();
+    for (var i = 0; i < themes.length; i++)
+    {
+      var a = $("<button>");
+      a.addClass('themeBtn');
+      a.attr('data-theme', themes[i]);
+      a.attr('type', 'button');
+      a.text(themes[i]);
+      $('#searchButtons').append(a);
+    }
+  }
+
+  renderButtons();
+
+  $('#addTheme').on('click', function(){
+    // bail out if input box is empty
+    if ($('#theme-input').val().length == 0)
+    {
+      alert('Please type something awesome.');
+      return false;
+    }
+
+    var theme = $('#theme-input').val().trim();
+    themes.push(theme);
+
+    // ToDo: Clear input box after pushing value onto the array
+    //$('#theme-input').value = '';
+    renderButtons();
+    return false;
+  });
+
+function FetchGIFs(btn) {
+    var themePicked = $(btn).data('theme');
+    var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + themePicked + "&api_key=dc6zaTOxFJmzC&limit=10";
+
+    $.ajax({
+        url: queryURL,
+        method: 'GET'
+    })
+
+    .done(function(response) {
+      var results = response.data;
+      for (var i=0; i<results.length; i++) {
+        var p = $('<p>').text('Rating: ' + results[i].rating);
+
+        var themeDiv = $('<div>');
+        var themeImage = $('<img>');
+
+        themeImage.attr('src', results[i].images.fixed_height_still.url)
+          .attr('data-still', results[i].images.fixed_height_still.url)
+          .attr('data-animate', results[i].images.fixed_height.url)
+          .attr('data-state', 'still')
+          .attr('class', 'themeImage');
+
+        themeDiv.append(p);
+        themeDiv.append(themeImage);
+
+        $('#gifsHere').prepend(themeDiv);
+
+      }
+    });
+    return;
+}
+
+  $("body").on("click", ".themeBtn", function() {return FetchGIFs(this);});
+
+  function ClickedImage(myThis){
+    alert('click3');
+    var state = $(myThis).attr('data-state');
+    console.log(state);
+
+    if (state == 'still') {
+      $(myThis).attr('src', $(myThis).attr('data-animate'));
+      $(myThis).attr('data-state', 'animate');
+    }else {
+      $(myThis).attr('src', $(myThis).attr('data-still'));
+      $(myThis).attr('data-state', 'still');
+    };
+  }
+
+  $("body").on("click", ".themeImage", function() {return ClickedImage(this);});
+  </script>
+
+
+
+</body>
+</html>
